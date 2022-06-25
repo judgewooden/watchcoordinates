@@ -1,0 +1,22 @@
+<h1>Watch Coordinate</h1>
+<button type="button" onclick="sendData()">send</button>
+
+<script>
+function sendData() {
+    var watchID = "sim";
+    var latitude = 100;
+    var longitude = 200;
+
+    path = "/api?i=" + watchID + "&a=" + longitude + "&b=" + latitude;
+    console.log(path);
+
+    fetch(path).then(function (response) {
+        return response.text();
+    }).then(function (html) {
+        console.log(html);
+    }).catch(function (err) {
+        console.warn("unexpected error", err)
+    })
+}
+
+</script>

@@ -1,0 +1,27 @@
+import { geolocation } from "geolocation";
+
+var watchID = geolocation.watchPosition(locationSuccess, locationError, { timeout: 60 * 1000 });
+
+function locationSuccess(position) {
+  let text = '{"Latitude":' + position.coords.latitude + ', "Longitude":'+position.coords.longitude+"}";
+
+  // console.log(text);
+   const obj = JSON.parse(text);
+   location(obj);
+   console.log("Latitude: " + position.coords.latitude,
+               "Longitude: " + position.coords.longitude);
+}
+
+function locationError(error) {
+  console.log("Error: " + error.code,
+              "Message: " + error.message);
+}
+
+var locationData = "https://paulweber.nl/index.py";
+function location(datas) {
+ // console.log( JSON.stringify(datas));
+  fetch(locationData,{method: "POST",body: JSON.stringify(datas)}).then(res => res.text()).then(hoop => { 
+    console.log(JSON.stringify(hoop));
+    console.log(hoop);
+   })
+};
