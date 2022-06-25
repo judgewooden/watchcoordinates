@@ -1,15 +1,25 @@
 <h1>Watch Coordinate</h1>
-<button type="button" onclick="sendData()">send</button>
+<label for="id">watch Id:</label>
+<input type="string" id="id"> <br>
+<label for="longitude">Longitude:</label>
+<input type="number" id="longitude"> <br>
+<label for="latitude">Latitude:</label>
+<input type="number" id="latitude"> <br>
+<button type="button" onclick="sendData()">to Server</button> <br>
 
 <script>
+
+var id = document.getElementById("id");
+var latitude = document.getElementById("longitude");
+var longitude = document.getElementById("latitude");
+
 function sendData() {
-    var watchID = "sim";
-    var latitude = 100;
-    var longitude = 200;
+    sendToServer(id.value, latitude.value, longitude.value);
+}
 
-    path = "/api?i=" + watchID + "&a=" + longitude + "&b=" + latitude;
+function sendToServer(i, a, b) {
+    var path = "/api?i=" + i + "&a=" + a + "&b=" + b;
     console.log(path);
-
     fetch(path).then(function (response) {
         return response.text();
     }).then(function (html) {
