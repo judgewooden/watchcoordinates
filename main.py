@@ -15,9 +15,6 @@ def root():
         mylist.append(k[6:])
     return render_template('index.html', watches=mylist)
 
-# @app.route('/watch/<watch_id>')
-#     return render_template("index.html")
-
 @app.route('/get')
 def api_get():
     id = request.args.get('id')
