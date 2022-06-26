@@ -5,7 +5,7 @@
             <label">My Location:</label>
             <span id="mylocation"></span>
         </div>
-        <button type="button" onclick="getLocation()">get my location</button> 
+        <button type="button" onclick="getLocation()">get browser location</button> 
     </div>
     <div class="wrapper">
         <div>
@@ -146,7 +146,14 @@ function calculateDirection(a, b) {
   brng = brng * 180 / Math.PI;
   brng = (brng + 360) % 360;
 
-  document.getElementById("direcion" + a).value = brng;
+  document.getElementById("direcion" + a).value = "(" + brng.toFixed(0) + "°) walk " + degToCompass(brng);
+}
+
+// display bearing in windirection words
+function degToCompass(num) {
+    var val = Math.floor((num / 22.5) + 0.5);
+    var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    return arr[(val % 16)];
 }
 
 function getLocation(i) {
