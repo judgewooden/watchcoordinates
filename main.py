@@ -50,16 +50,12 @@ def api_set():
             print("ERROR", e)
         return 'ERROR' + e, 400
 
-
     now = datetime.datetime.now()
 
-    r.hset("watch:" + id, "lastupdated", now.strftime("%Y%m%d%H%M%S") )
+    r.hset("watch:" + id, "lastupdated", now.strftime("%Y-%m-%d %H:%M:%S") )
     r.hset("watch:" + id, "longitude", longitude)
     r.hset("watch:" + id, "latitude", latitude)
     return '', 200
 
 if __name__ == "__main__":
     app.run()
-
-
-

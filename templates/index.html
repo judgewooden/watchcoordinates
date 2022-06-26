@@ -1,5 +1,5 @@
 <h1>Watch Coordinates</h1>
-<div class="block"></div>
+<div class="block">
     <div class="wrapper">
         <div>
             <label">My Location:</label>
@@ -9,7 +9,7 @@
     </div>
     <div class="wrapper">
         <div>
-            <label">watch Id 1:</label>
+            <label">watch 1:</label>
             <input type="string" id=id1 list="watches"> <br> <br>
             <label">Latitude:</label>
             <input type="number" id=latitude1> <br>
@@ -17,20 +17,20 @@
             <input type="number" id=longitude1> <br>
             <button type="button" onclick="copyMyLocation(1)">copy from my Location</button> <br> <br>
             <label">Last updated:</label>
-            <input type="string" id=lastupdated1> <br>
+            <span id="lastupdated1"></span> <br>
             <label">Last Message:</label>
             <spam id=msg1></spam> <br>
             <button type="button" onclick="sendToServer(1)">send to Server</button> 
             <button type="button" onclick="receiveFromServer(1)">get from Server</button> <br> <br>
             <label">Direction:</label>
-            <input type="string" id=direcion1> <br>
-            <button type="button" onclick="calculateDirection(1, 2)">calculate Direction</button> <br> <br>
+            <span id="direction1"></span> <br>
             <label">Distance:</label>
-            <input type="string" id=distance1> <br>
-            <button type="button" onclick="calculateDistance(1, 2)">calculate Distance</button> <br> <br>
+            <span id="distance1"></span> <br>
+            <label">Last seen:</label>
+            <span id="timeago1"></span>
         </div>
         <div>
-            <label">watch Id 2:</label>
+            <label">watch 2:</label>
             <input type="string" id=id2 list="watches"> <br> <br>
             <label>Latitude:</label>
             <input type="number" id=latitude2> <br>
@@ -38,19 +38,22 @@
             <input type="number" id=longitude2> <br>
             <button type="button" onclick="copyMyLocation(2)">copy from my Location</button> <br> <br>
             <label">Last updated:</label>
-            <input type="string" id=lastupdated2> <br>
+            <span id="lastupdated2"></span> <br>
             <label">Last Message:</label>
             <spam id=msg2></spam> <br>
-            <button type="button" onclick="sendToServer(2)">to Server</button> 
-            <button type="button" onclick="receiveFromServer(2)">from Server</button> <br> <br>
+            <button type="button" onclick="sendToServer(2)">send to Server</button> 
+            <button type="button" onclick="receiveFromServer(2)">get from Server</button> <br> <br>
             <label">Direction:</label>
-            <input type="string" id=direcion2> <br>
-            <button type="button" onclick="calculateDirection(2, 1)">calculate Direction</button> <br> <br>
+            <span id="direction2"></span> <br>
             <label">Distance:</label>
-            <input type="string" id=distance2> <br>
-            <button type="button" onclick="calculateDistance(2, 1)">calculate Distance</button> <br> <br>
+            <span id="distance2"></span> <br>
+            <label">Last seen:</label>
+            <span id="timeago2"></span>
         </div>
     </div>  
+    <div class="wrapper">
+        <button id=timerbutton type="button" onclick="buttonTimer()">Stop Auto-Update</button> 
+    </div>
 </div>
 <datalist id=watches>
 {% for item in watches %}
@@ -94,23 +97,10 @@
 var lat = 0;
 var lng = 0;
 
-const gelocationOptions = {
-  enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0
-}
-
-function calculateDistance(a, b) {
-    document.getElementById("msg" + a).innerHTML = "";
-    var lat1 = document.getElementById("latitude" + a).value;
-    var lon1 = document.getElementById("longitude" + a).value;
-    var lat2 = document.getElementById("latitude" + b).value;
-    var lon2 = document.getElementById("longitude" + b).value;
-    
+function distanceInKM(lat1, lon1, lat2, lon2) {
     if ((lat1 == lat2) && (lon1 == lon2)) {
-        answer = "You are at the same location";
-    }
-    else {
+        dist = 0;
+    } else {
         var radlat1 = Math.PI * lat1/180;
         var radlat2 = Math.PI * lat2/180;
         var theta = lon1-lon2;
@@ -122,31 +112,69 @@ function calculateDistance(a, b) {
         dist = Math.acos(dist);
         dist = dist * 180/Math.PI;
         dist = dist * 60 * 1.1515 * 1.609344;
-        if ( dist < 1 ) {
-            answer = (dist*1000).toFixed(2) + " m";
-        } else {
-            answer = dist.toFixed(2) + " km";
-        }
     }
-    console.log(answer);
-    document.getElementById("distance" + a).value = answer;
+    return dist;
 }
 
-function calculateDirection(a, b) {
-  document.getElementById("msg" + a).innerHTML = "";
-  var lat1 = document.getElementById("latitude" + a).value;
-  var lng1 = document.getElementById("longitude" + a).value;
-  var lat2 = document.getElementById("latitude" + b).value;
-  var lng2 = document.getElementById("longitude" + b).value;
+function calculateDistance(a, b) {
+    var lat1 = document.getElementById("latitude" + a).value;
+    var lon1 = document.getElementById("longitude" + a).value;
+    var lat2 = document.getElementById("latitude" + b).value;
+    var lon2 = document.getElementById("longitude" + b).value;
+    
+    dist = distanceInKM(lat1, lon1, lat2, lon2);
+    if ( dist < 1 ) {
+        answer = (dist*1000).toFixed(2) + " m";
+    } else {
+        answer = dist.toFixed(2) + " km";
+    }
+    document.getElementById("distance" + a).innerHTML = answer;
+}
 
-  var dLon = (lng2 - lng1) * Math.PI / 180;
-  var y = Math.sin(dLon) * Math.cos(lat2);
-  var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-  var brng = Math.atan2(y, x);
+// function to explain the time difference between to dates
+function timeAgo(datetime) {
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+    var msPerYear = msPerDay * 365;
+
+    var elapsed = new Date() - datetime;
+
+    if (elapsed < msPerMinute) {
+        return Math.round(elapsed/1000) + ' seconds ago';   
+    }
+    else if (elapsed < msPerHour) {
+        return Math.round(elapsed/msPerMinute) + ' minutes ago';   
+    }
+    else if (elapsed < msPerDay) {
+        return Math.round(elapsed/msPerHour) + ' hours ago';   
+    }
+    else if (elapsed < msPerMonth) {
+        return Math.round(elapsed/msPerDay) + ' days ago';   
+    }
+    else if (elapsed < msPerYear) {
+        return Math.round(elapsed/msPerMonth) + ' months ago';   
+    }
+    else {
+        return Math.round(elapsed/msPerYear) + ' years ago';   
+    }
+}
+
+// calculate the direction in degrees
+function calculateDegrees(a, b) {
+  var lat1 = document.getElementById("latitude" + a).value * Math.PI / 180;
+  var lng1 = document.getElementById("longitude" + a).value * Math.PI / 180;
+  var lat2 = document.getElementById("latitude" + b).value * Math.PI / 180;
+  var lng2 = document.getElementById("longitude" + b).value * Math.PI / 180;
+
+  y = Math.sin(lng2 - lng1) * Math.cos(lat2);
+  x = Math.cos(lat1) * Math.sin(lat2) -
+        Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1);
+  brng = Math.atan2(y, x);
   brng = brng * 180 / Math.PI;
   brng = (brng + 360) % 360;
-
-  document.getElementById("direcion" + a).value = "(" + brng.toFixed(0) + "°) walk " + degToCompass(brng);
+  return brng;
 }
 
 // display bearing in windirection words
@@ -154,6 +182,18 @@ function degToCompass(num) {
     var val = Math.floor((num / 22.5) + 0.5);
     var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
     return arr[(val % 16)];
+}
+
+// update Direction fields
+function calculateDirection(a, b) {
+  brng=calculateDegrees(a, b);
+  document.getElementById("direction" + a).innerHTML = "(" + brng.toFixed(0) + "°) walk " + degToCompass(brng);
+}
+
+const gelocationOptions = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0
 }
 
 function getLocation(i) {
@@ -177,6 +217,31 @@ function copyMyLocation(i) {
     document.getElementById("longitude" + i).value = lng;
 }
 
+// set a timer for ever 1000 milliseconds
+function updateFields() {
+    document.getElementById("timeago1").innerHTML = timeAgo(new Date(document.getElementById("lastupdated1").innerHTML));
+    document.getElementById("timeago2").innerHTML = timeAgo(new Date(document.getElementById("lastupdated2").innerHTML));
+    calculateDirection(2, 1);
+    calculateDirection(1, 2);
+    calculateDistance(2, 1);
+    calculateDistance(1, 2);
+}
+
+var timer = setInterval( updateFields , 1000 );
+var timeron = true;
+
+function buttonTimer() {
+    if ( timeron ) {
+        clearInterval(timer);
+        document.getElementById("timerbutton").innerHTML = "Start Auto-Update";
+        timeron = false;
+    } else {
+        timer = setInterval( updateFields , 1000 );
+        document.getElementById("timerbutton").innerHTML = "Stop Auto-Update";
+        timeron = true;
+    }
+}
+
 function receiveFromServer(i) {
     document.getElementById("msg" + i).innerHTML = "";
     path = "/get?id=" + document.getElementById("id" +i).value;
@@ -191,7 +256,7 @@ function receiveFromServer(i) {
         if ( answer.length > 0 ) {
             var json = JSON.parse(answer);
             
-            document.getElementById("lastupdated" + i).value = json.lastupdated;
+            document.getElementById("lastupdated" + i).innerHTML = json.lastupdated;
             document.getElementById("latitude" + i).value = json.latitude;
             document.getElementById("longitude" + i).value = json.longitude;
         }
