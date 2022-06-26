@@ -1,32 +1,6 @@
 
-Skip to content
-Pull requests
-Issues
-Marketplace
-Explore
-@judgewooden
-judgewooden /
-watchdirection
-Public
-
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-
-    Settings
-
-watchdirection/.gitignore
-@judgewooden
-judgewooden Initial commit
-Latest commit bd8dbea now
-History
-1 contributor
-129 lines (105 sloc) 1.76 KB
+watchcoordinates.wsgi
+make_production.sh
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

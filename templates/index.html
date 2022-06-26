@@ -91,23 +91,19 @@ const gelocationOptions = {
   maximumAge: 0
 }
 
-// calculate direction between two geocooridates
-function calculateGEODirection(lat1, lng1, lat2, lng2) {
+function calculateDirection(a, b) {
+  var lat1 = document.getElementById("latitude" + a).value;
+  var lng1 = document.getElementById("longitude" + a).value;
+  var lat2 = document.getElementById("latitude" + b).value;
+  var lng2 = document.getElementById("longitude" + b).value;
+
   var dLon = (lng2 - lng1) * Math.PI / 180;
   var y = Math.sin(dLon) * Math.cos(lat2);
   var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
   var brng = Math.atan2(y, x);
   brng = brng * 180 / Math.PI;
   brng = (brng + 360) % 360;
-  return brng;
-}
 
-function calculateDirection(a, b) {
-  var lat1 = document.getElementById("latitude" + a).value;
-  var lng1 = document.getElementById("longitude" + a).value;
-  var lat2 = document.getElementById("latitude" + b).value;
-  var lng2 = document.getElementById("longitude" + b).value;
-  var brng = calculateGEODirection(lat1, lng1, lat2, lng2);
   document.getElementById("direcion" + a).value = brng;
 }
 
