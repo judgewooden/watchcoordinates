@@ -141,7 +141,7 @@ function receiveFromServer(i) {
         if ( answer.length > 0 ) {
             var json = JSON.parse(answer);
             
-            document.getElementById("longitude" + i).value = json.longitude;
+            document.getElementById("lastupdated" + i).value = json.lastupdated;
             document.getElementById("latitude" + i).value = json.latitude;
             document.getElementById("latitude" + i).value = json.latitude;
         }
