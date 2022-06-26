@@ -61,7 +61,8 @@ def api_set():
     r.hset("watch:" + id, "latitude", latitude)
     return '', 200
 
-app.run()
+if __name__ == "__main__":
+    app.run()
 
 
 
