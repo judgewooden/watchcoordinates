@@ -97,6 +97,7 @@
 var lat = 0;
 var lng = 0;
 
+// calculate distance in km for two geocoordinates
 function distanceInKM(lat1, lon1, lat2, lon2) {
     if ((lat1 == lat2) && (lon1 == lon2)) {
         dist = 0;
@@ -161,20 +162,15 @@ function timeAgo(datetime) {
     }
 }
 
-// calculate the direction in degrees
-function calculateDegrees(a, b) {
-  var lat1 = document.getElementById("latitude" + a).value * Math.PI / 180;
-  var lng1 = document.getElementById("longitude" + a).value * Math.PI / 180;
-  var lat2 = document.getElementById("latitude" + b).value * Math.PI / 180;
-  var lng2 = document.getElementById("longitude" + b).value * Math.PI / 180;
-
-  y = Math.sin(lng2 - lng1) * Math.cos(lat2);
-  x = Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1);
-  brng = Math.atan2(y, x);
-  brng = brng * 180 / Math.PI;
-  brng = (brng + 360) % 360;
-  return brng;
+// calculate the direction in degrees for two geocoordinates
+function calculateDegrees(lat1, lng1, lat2, lng2) {
+    y = Math.sin(lng2 - lng1) * Math.cos(lat2);
+    x = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1);
+    brng = Math.atan2(y, x);
+    brng = brng * 180 / Math.PI;
+    brng = (brng + 360) % 360;
+    return brng;
 }
 
 // display bearing in windirection words
@@ -186,7 +182,11 @@ function degToCompass(num) {
 
 // update Direction fields
 function calculateDirection(a, b) {
-  brng=calculateDegrees(a, b);
+  var lat1 = document.getElementById("latitude" + a).value * Math.PI / 180;
+  var lng1 = document.getElementById("longitude" + a).value * Math.PI / 180;
+  var lat2 = document.getElementById("latitude" + b).value * Math.PI / 180;
+  var lng2 = document.getElementById("longitude" + b).value * Math.PI / 180;
+  brng=calculateDegrees(lat1, lng1, lat2, lng2);
   document.getElementById("direction" + a).innerHTML = "(" + brng.toFixed(0) + "°) walk " + degToCompass(brng);
 }
 
