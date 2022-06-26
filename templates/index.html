@@ -1,30 +1,53 @@
 <h1>Watch Coordinate</h1>
-<div class="wrapper">
-    <div>
-        <label">watch Id 1:</label>
-        <input type="string" id="id1"> <br>
-        <label">Longitude:</label>
-        <input type="number" id="longitude1"> <br>
-        <label">Latitude:</label>
-        <input type="number" id="latitude1"> <br>
-        <label">Last updated:</label>
-        <input type="string" id="lastupdated1"> <br>
-        <button type="button" onclick="sendData(1)">to Server</button> <br>
-        <button type="button" onclick="receiveData(1)">from Server</button> <br>
+<div class="block"></div>
+    <div class="wrapper">
+        <span id="mylocation"></span>
+        <button type="button" onclick="getLocation()">get my location</button> 
     </div>
-    <div>
-        <label">watch Id 2:</label>
-        <input type="string" id="id2"> <br>
-        <label">Longitude:</label>
-        <input type="number" id="longitude2"> <br>
-        <label>Latitude:</label>
-        <input type="number" id="latitude2"> <br>
-        <label">Last updated:</label>
-        <input type="string" id="lastupdated2"> <br>
-        <button type="button" onclick="sendData(2)">to Server</button> <br>
-        <button type="button" onclick="receiveData(2)">from Server</button> <br>
-    </div>
-</div>  
+    <div class="wrapper">
+        <div>
+            <label">watch Id 1:</label>
+            <input type="string" id=id1 list="watches"> <br>
+            <label">Latitude:</label>
+            <input type="number" id=latitude1> <br>
+            <label">Longitude:</label>
+            <input type="number" id=longitude1> <br>
+            <button type="button" onclick="copyMyLocation(1)">copy my Location</button> <br>
+            <label">Last updated:</label>
+            <input type="string" id=lastupdated1> <br>
+            <label">Message:</label>
+            <spam id=msg1></spam> <br>
+            <button type="button" onclick="sendToServer(1)">to Server</button> 
+            <button type="button" onclick="receiveFromServer(1)">from Server</button> <br> <br>
+            <label">Direction:</label>
+            <input type="number" id=direcion1> <br>
+            <button type="button" onclick="calculateDirection(1, 2)">calculate</button> <br>
+        </div>
+        <div>
+            <label">watch Id 2:</label>
+            <input type="string" id=id2 list="watches"> <br>
+            <label>Latitude:</label>
+            <input type="number" id=latitude2> <br>
+            <label">Longitude:</label>
+            <input type="number" id=longitude2> <br>
+            <button type="button" onclick="copyMyLocation(2)">copy my Location</button> <br>
+            <label">Last updated:</label>
+            <input type="string" id=lastupdated2> <br>
+            <label">Message:</label>
+            <spam id=msg2></spam> <br>
+            <button type="button" onclick="sendToServer(2)">to Server</button> 
+            <button type="button" onclick="receiveFromServer(2)">from Server</button> <br> <br>
+            <label">Direction:</label>
+            <input type="number" id=direcion2> <br>
+            <button type="button" onclick="calculateDirection(2, 1)">calculate</button> <br>
+        </div>
+    </div>  
+</div>
+<datalist id=watches>
+{% for item in watches %}
+    <option>{{ item }}</option>
+{% endfor %}
+</datalist>
 
 <style>
   page {
@@ -44,6 +67,9 @@
       height: 210mm;     
       background: white;
       margin-top: -1px;
+  } 
+  h1 {
+      text-align: center;
   }
   .wrapper {
     display: flex;
@@ -56,52 +82,88 @@
 
 <script>
 
-var id1 = document.getElementById("id1");
-var latitude1 = document.getElementById("longitude1");
-var longitude1 = document.getElementById("latitude1");
-var lastupdated1 = document.getElementById("lastupdated1");
+var lat = 0;
+var lng = 0;
 
-var id2 = document.getElementById("id2");
-var latitude2 = document.getElementById("longitude2");
-var longitude2 = document.getElementById("latitude2");
-var lastupdated2 = document.getElementById("lastupdated2");
-
-function sendData(i) {
-    if (i == 1) sendToServer(id1.value, latitude1.value, longitude1.value);
-    if (i == 2) sendToServer(id2.value, latitude2.value, longitude2.value);
+const gelocationOptions = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0
 }
-function receiveData(i) {
-    if (i == 1) path = "/get?i=" + id1.value;
-    if (i == 2) path = "/get?i=" + id2.value;
+
+// calculate direction between two geocooridates
+function calculateGEODirection(lat1, lng1, lat2, lng2) {
+  var dLon = (lng2 - lng1) * Math.PI / 180;
+  var y = Math.sin(dLon) * Math.cos(lat2);
+  var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+  var brng = Math.atan2(y, x);
+  brng = brng * 180 / Math.PI;
+  brng = (brng + 360) % 360;
+  return brng;
+}
+
+function calculateDirection(a, b) {
+  var lat1 = document.getElementById("latitude" + a).value;
+  var lng1 = document.getElementById("longitude" + a).value;
+  var lat2 = document.getElementById("latitude" + b).value;
+  var lng2 = document.getElementById("longitude" + b).value;
+  var brng = calculateGEODirection(lat1, lng1, lat2, lng2);
+  document.getElementById("direcion" + a).value = brng;
+}
+
+function getLocation(i) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition( function( position ) {
+        lat = position.coords.latitude;
+        lng = position.coords.longitude;
+        document.getElementById("mylocation").innerHTML = "Latitude: " + lat + " Longitude: " + lng;
+        
+    }, function(error) {
+        alert("Geolocation failed");
+    }, gelocationOptions)
+  } else {
+     alert("Geolocation not supported.");
+  }
+}
+
+function copyMyLocation(i) {
+    document.getElementById("latitude" + i).value = lat;
+    document.getElementById("longitude" + i).value = lng;
+}
+
+function receiveFromServer(i) {
+    path = "/get?id=" + document.getElementById("id" +i).value;
+    document.getElementById("msg" + i).innerHTML = "";
+
     console.log(path);
     fetch(path).then(function (response) {
+        document.getElementById("msg" + i).innerHTML = response.status;
         return response.text();
     }).then(function (answer) {
-        console.log(answer);
+        console.log("answer", answer);
 
-        var json = JSON.parse(answer);
-        if (i == 1) {
-            id1.value = json.id;
-            longitude1.value = json.longitude;
-            latitude1.value = json.latitude;
-            lastupdated1.value = json.lastupdated;
-        }
-        if (i == 2) {
-            id2.value = json.id;
-            longitude2.value = json.longitude;
-            latitude2.value = json.latitude;
-            lastupdated2.value = json.lastupdated;
+        if ( answer.length > 0 ) {
+            var json = JSON.parse(answer);
+            
+            document.getElementById("longitude" + i).value = json.longitude;
+            document.getElementById("latitude" + i).value = json.latitude;
+            document.getElementById("latitude" + i).value = json.latitude;
         }
         
     }).catch(function (err) {
+        document.getElementById("msg" + i).innerHTML = "unexpected error" + err;
         console.warn("unexpected error", err)
     })
 }
 
-function sendToServer(i, a, b) {
-    var path = "/set?i=" + i + "&a=" + a + "&b=" + b;
+function sendToServer(i) {
+    var path = "/set?id=" + document.getElementById("id" + i).value
+     + "&longitude=" + document.getElementById("longitude" + i).value
+      + "&latitude=" + document.getElementById("latitude" + i).value;
+
     console.log(path);
     fetch(path).then(function (response) {
+        document.getElementById("msg" + i).innerHTML = response.status;
         return response.text();
     }).then(function (html) {
         console.log(html);
