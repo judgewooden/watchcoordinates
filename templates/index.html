@@ -1,45 +1,54 @@
-<h1>Watch Coordinate</h1>
+<h1>Watch Coordinates</h1>
 <div class="block"></div>
     <div class="wrapper">
-        <span id="mylocation"></span>
+        <div>
+            <label">My Location:</label>
+            <span id="mylocation"></span>
+        </div>
         <button type="button" onclick="getLocation()">get my location</button> 
     </div>
     <div class="wrapper">
         <div>
             <label">watch Id 1:</label>
-            <input type="string" id=id1 list="watches"> <br>
+            <input type="string" id=id1 list="watches"> <br> <br>
             <label">Latitude:</label>
             <input type="number" id=latitude1> <br>
             <label">Longitude:</label>
             <input type="number" id=longitude1> <br>
-            <button type="button" onclick="copyMyLocation(1)">copy my Location</button> <br>
+            <button type="button" onclick="copyMyLocation(1)">copy from my Location</button> <br> <br>
             <label">Last updated:</label>
             <input type="string" id=lastupdated1> <br>
-            <label">Message:</label>
+            <label">Last Message:</label>
             <spam id=msg1></spam> <br>
-            <button type="button" onclick="sendToServer(1)">to Server</button> 
-            <button type="button" onclick="receiveFromServer(1)">from Server</button> <br> <br>
+            <button type="button" onclick="sendToServer(1)">send to Server</button> 
+            <button type="button" onclick="receiveFromServer(1)">get from Server</button> <br> <br>
             <label">Direction:</label>
-            <input type="number" id=direcion1> <br>
-            <button type="button" onclick="calculateDirection(1, 2)">calculate</button> <br>
+            <input type="string" id=direcion1> <br>
+            <button type="button" onclick="calculateDirection(1, 2)">calculate Direction</button> <br> <br>
+            <label">Distance:</label>
+            <input type="string" id=distance1> <br>
+            <button type="button" onclick="calculateDistance(1, 2)">calculate Distance</button> <br> <br>
         </div>
         <div>
             <label">watch Id 2:</label>
-            <input type="string" id=id2 list="watches"> <br>
+            <input type="string" id=id2 list="watches"> <br> <br>
             <label>Latitude:</label>
             <input type="number" id=latitude2> <br>
             <label">Longitude:</label>
             <input type="number" id=longitude2> <br>
-            <button type="button" onclick="copyMyLocation(2)">copy my Location</button> <br>
+            <button type="button" onclick="copyMyLocation(2)">copy from my Location</button> <br> <br>
             <label">Last updated:</label>
             <input type="string" id=lastupdated2> <br>
-            <label">Message:</label>
+            <label">Last Message:</label>
             <spam id=msg2></spam> <br>
             <button type="button" onclick="sendToServer(2)">to Server</button> 
             <button type="button" onclick="receiveFromServer(2)">from Server</button> <br> <br>
             <label">Direction:</label>
-            <input type="number" id=direcion2> <br>
-            <button type="button" onclick="calculateDirection(2, 1)">calculate</button> <br>
+            <input type="string" id=direcion2> <br>
+            <button type="button" onclick="calculateDirection(2, 1)">calculate Direction</button> <br> <br>
+            <label">Distance:</label>
+            <input type="string" id=distance2> <br>
+            <button type="button" onclick="calculateDistance(2, 1)">calculate Distance</button> <br> <br>
         </div>
     </div>  
 </div>
@@ -91,7 +100,40 @@ const gelocationOptions = {
   maximumAge: 0
 }
 
+function calculateDistance(a, b) {
+    document.getElementById("msg" + a).innerHTML = "";
+    var lat1 = document.getElementById("latitude" + a).value;
+    var lon1 = document.getElementById("longitude" + a).value;
+    var lat2 = document.getElementById("latitude" + b).value;
+    var lon2 = document.getElementById("longitude" + b).value;
+    
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+        answer = "You are at the same location";
+    }
+    else {
+        var radlat1 = Math.PI * lat1/180;
+        var radlat2 = Math.PI * lat2/180;
+        var theta = lon1-lon2;
+        var radtheta = Math.PI * theta/180;
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        if (dist > 1) {
+            dist = 1;
+        }
+        dist = Math.acos(dist);
+        dist = dist * 180/Math.PI;
+        dist = dist * 60 * 1.1515 * 1.609344;
+        if ( dist < 1 ) {
+            answer = (dist*1000).toFixed(2) + " m";
+        } else {
+            answer = dist.toFixed(2) + " km";
+        }
+    }
+    console.log(answer);
+    document.getElementById("distance" + a).value = answer;
+}
+
 function calculateDirection(a, b) {
+  document.getElementById("msg" + a).innerHTML = "";
   var lat1 = document.getElementById("latitude" + a).value;
   var lng1 = document.getElementById("longitude" + a).value;
   var lat2 = document.getElementById("latitude" + b).value;
@@ -123,13 +165,14 @@ function getLocation(i) {
 }
 
 function copyMyLocation(i) {
+    document.getElementById("msg" + i).innerHTML = "";
     document.getElementById("latitude" + i).value = lat;
     document.getElementById("longitude" + i).value = lng;
 }
 
 function receiveFromServer(i) {
-    path = "/get?id=" + document.getElementById("id" +i).value;
     document.getElementById("msg" + i).innerHTML = "";
+    path = "/get?id=" + document.getElementById("id" +i).value;
 
     console.log(path);
     fetch(path).then(function (response) {
@@ -153,6 +196,7 @@ function receiveFromServer(i) {
 }
 
 function sendToServer(i) {
+    document.getElementById("msg" + i).innerHTML = "";
     var path = "/set?id=" + document.getElementById("id" + i).value
      + "&longitude=" + document.getElementById("longitude" + i).value
       + "&latitude=" + document.getElementById("latitude" + i).value;
@@ -162,7 +206,9 @@ function sendToServer(i) {
         document.getElementById("msg" + i).innerHTML = response.status;
         return response.text();
     }).then(function (html) {
-        console.log(html);
+        if ( html.length > 0 ) {
+            console.log(html);
+        }
     }).catch(function (err) {
         console.warn("unexpected error", err)
     })
