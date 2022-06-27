@@ -8,6 +8,13 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 r = redis.Redis(decode_responses=True)
 
+@app.route('/web')
+def root():
+    mylist=[]
+    for k in r.keys("watch:*"):
+        mylist.append(k[6:])
+    return render_template('web.html', watches=mylist)
+
 @app.route('/')
 def root():
     mylist=[]
@@ -58,4 +65,4 @@ def api_set():
     return '', 200
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
