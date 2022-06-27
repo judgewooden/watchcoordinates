@@ -1,0 +1,80 @@
+<script>
+
+// calculate distance in km for two geocoordinates
+function distanceInKM(lat1, lon1, lat2, lon2) {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+        dist = 0;
+    } else {
+        var radlat1 = Math.PI * lat1/180;
+        var radlat2 = Math.PI * lat2/180;
+        var theta = lon1-lon2;
+        var radtheta = Math.PI * theta/180;
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        if (dist > 1) {
+            dist = 1;
+        }
+        dist = Math.acos(dist);
+        dist = dist * 180/Math.PI;
+        dist = dist * 60 * 1.1515 * 1.609344;
+    }
+    return dist;
+}
+
+// function to explain the time difference between to dates
+function timeAgo(datetime) {
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+    var msPerYear = msPerDay * 365;
+
+    var elapsed = new Date() - datetime;
+
+    if ( isNaN(elapsed) ) {
+        long = "no data available";
+        short = "no update";
+    } else if (elapsed < msPerMinute) {
+        long = Math.round(elapsed/1000) + ' seconds ago';
+        short = Math.round(elapsed/1000) + 'sec';
+    } else if (elapsed < msPerHour) {
+        long = Math.round(elapsed/msPerMinute) + ' minutes ago';
+        short = Math.round(elapsed/msPerMinute) + 'min';
+    }
+    else if (elapsed < msPerDay) {
+        long = Math.round(elapsed/msPerHour) + ' hours ago';
+        short = Math.round(elapsed/msPerHour) + 'uur';
+    }
+    else if (elapsed < msPerMonth) {
+        long = Math.round(elapsed/msPerDay) + ' days ago';
+        short = Math.round(elapsed/msPerDay) + 'dagen';
+    }
+    else if (elapsed < msPerYear) {
+        long = Math.round(elapsed/msPerMonth) + ' months ago';
+        short = Math.round(elapsed/msPerMonth) + 'maand';
+    }
+    else {
+        long = Math.round(elapsed/msPerYear) + ' years ago';
+        short = Math.round(elapsed/msPerYear) + 'jaren';
+    }
+    return { 'long' : long, 'short' : short };
+}
+
+// calculate the direction in degrees for two geocoordinates
+function calculateDegrees(lat1, lng1, lat2, lng2) {
+    y = Math.sin(lng2 - lng1) * Math.cos(lat2);
+    x = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1);
+    brng = Math.atan2(y, x);
+    brng = brng * 180 / Math.PI;
+    brng = (brng + 360) % 360;
+    return brng;
+}
+
+// display bearing in windirection words
+function degToCompass(num) {
+    var val = Math.floor((num / 22.5) + 0.5);
+    var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    return arr[(val % 16)];
+}
+
+</script>

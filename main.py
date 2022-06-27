@@ -9,14 +9,14 @@ app.config["DEBUG"] = True
 r = redis.Redis(decode_responses=True)
 
 @app.route('/web')
-def root():
+def root_web():
     mylist=[]
     for k in r.keys("watch:*"):
         mylist.append(k[6:])
     return render_template('web.html', watches=mylist)
 
 @app.route('/')
-def root():
+def root_mobile():
     mylist=[]
     for k in r.keys("watch:*"):
         mylist.append(k[6:])
