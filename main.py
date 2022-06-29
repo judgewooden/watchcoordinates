@@ -22,18 +22,23 @@ def root_mobile():
         mylist.append(k[6:])
     return render_template('index.html', watches=mylist)
 
+@app.route('/compass')
+def compass_mobile():
+    return render_template('compass.html')
+
 @app.route('/get')
 def api_get():
-    id = request.args.get('id')
+    id = request.args.get('id').strip()
 
     answer={}
     answer['id'] = id
     answer['lastupdated'] = r.hget("watch:" + id, "lastupdated")
-    if answer['lastupdated'] is None:
+    if answer['lastupdated'] is None or id is None or len(id) < 3:
         if app.config["DEBUG"]:
-            print(id, "NOT FOUND")
+            print("NOT FOUND", id)
         return "", 404
 
+    print("hello")
     answer['longitude'] = r.hget("watch:" + id, "longitude")
     answer['latitude'] = r.hget("watch:" + id, "latitude")
 
@@ -47,15 +52,19 @@ def api_set():
         print("set", request.args )
     
     try:
-        id = request.args.get('id')
+        id = request.args.get('id').strip()
         latitude = float(request.args.get('latitude'))
         longitude = float(request.args.get('longitude'))
-        if id is None or latitude is None or longitude is None:
-            raise Exception("BAD REQUEST")
+        if id == None or len(id) < 3:
+            raise Exception("id less than 3 characters")
+        if latitude is None:
+            raise Exception("latidude missing")
+        if longitude is None:
+            raise Exception("longitude missing")
     except Exception as e:
         if app.config["DEBUG"]:
-            print("ERROR", e)
-        return 'ERROR' + e, 400
+            print("BAD REQUEST", e)
+        return '', 400
 
     now = datetime.datetime.now()
 

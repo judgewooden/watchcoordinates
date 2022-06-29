@@ -28,7 +28,9 @@ function timeAgo(datetime) {
     var msPerMonth = msPerDay * 30;
     var msPerYear = msPerDay * 365;
 
-    var elapsed = new Date() - datetime;
+    var elapsed = new Date() - new Date(datetime.replace(/-/g, "/"));
+    // debug.innerHTML=debug.innerHTML + "e->"+ elapsed + "<br>";
+    // debug.innerHTML=debug.innerHTML + "d->"+ datetime + "<br>";
 
     if ( isNaN(elapsed) ) {
         long = "no data available";
@@ -36,9 +38,11 @@ function timeAgo(datetime) {
     } else if (elapsed < msPerMinute) {
         long = Math.round(elapsed/1000) + ' seconds ago';
         short = Math.round(elapsed/1000) + 'sec';
+        next = 1000;
     } else if (elapsed < msPerHour) {
         long = Math.round(elapsed/msPerMinute) + ' minutes ago';
         short = Math.round(elapsed/msPerMinute) + 'min';
+        next = 60 * 1000;
     }
     else if (elapsed < msPerDay) {
         long = Math.round(elapsed/msPerHour) + ' hours ago';
