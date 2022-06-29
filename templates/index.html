@@ -1,15 +1,16 @@
 <html>
-<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <body>
-    <div>
+    <div class=all>
         <div class=block>
-            <label>Naam:</label>
-            <input type="string" id=me size=10>
+            <label>Mijn naam:</label>
+            <input type="string" id=me size=10 list="watches">
             <span id=msg></span> 
         </div>
         <div class=block>
             <label>Frequency:</label>
-            <select id=freq size=1>
+            <select id=freq size=1 onchange="startGEO()">
                 <option value="-1">Privacy modus</option>
                 <option value="5">5 sec</option>
                 <option value="10">10 sec</option>
@@ -22,49 +23,64 @@
                 <option value="900">15 min</option>
                 <option value="1800">30 min</option>
                 <option value="3600">1 uur</option>
-                <!-- <option value="0">Doe ik zelf</option> -->
+                <option value="0">Doe ik zelf</option>
             </select> <br>
         </div>
-        <div class=block>
-            <label></label>
-            <button id=start type="button" onclick="startGEO()">Start</button> <br> <br>
-        </div>
-        <div class=block>
-            <label></label>
-            <a href="/web"">debug console</a>
-        </div>  
         <div class=block>
             <label>Zoek naar:</label>
             <select id="name" onchange="calcGEO()">
                 {% for item in watches %}
                 <option>{{ item }}</option>
                 {% endfor %}
-            </select> <br> <br> <br>
+            </select> 
         </div>
-    </div>
-    <div class=center>
-        <div class=w-circle onclick="calcGEO()"">
-            <div id=cir1-out class='circle w-circle-out'>&#9660;</div>
-            <div id=cir1-in class='circle w-circle-in'>&#9650;</div>
-            <div class='w-circle flex-container'>
-                <div id=way class="w-way flex-items">direct</div>
-                <div id=far class="w-far flex-items">far</div>
-                <div id=age class="w-age flex-items">age</div>
+        <div class=block>
+            <label></label>
+            <button type="button" onclick="startCompass()">Start Compass iphone</button> <br> <br>
+        </div>
+        <div class=block>
+            <div class=wcircle onclick="calcGEO()"">
+                <div id=cir-out class='circle wcircle-out'>&#9660;</div>
+                <div id=cir-in class='circle wcircle-in'>&#9650;</div>
+                <div class='wcontainer'>
+                    <div id=way class="witems">direct</div>
+                    <div id=far class="witems">far</div>
+                    <div id=age class="witems">age</div>
+                    <div id=compass class="witems">compassX</div>
+                </div> 
             </div>
         </div>
+        <div class=debug>
+            <a href="/web"">debug console</a> <br>
+            agent:<span id=agent></span> <br>
+            my agent:<span id=myagent></span> <br>
+            debug:<span id=debug></span> <br>
+        </div>  
     <div>
+<datalist id=watches>
+{% for item in watches %}
+<option>{{ item }}</option>
+{% endfor %}
+</datalist>
 </body>
 </html>
 
 <style>
   html {
     font-family: sans-serif;
-    /* font-size: small; */
-    /* height: 100vh;
-    width: 100vw; */
+    font-size: large;
+  }
+
+  .all {
+    text-align: center;
+    margin:auto;
+    display:block;
   }
 
   .block {
+    text-align: left;
+    width: 300px;
+    margin:auto;
     margin-bottom: 4px;
   }
 
@@ -74,12 +90,8 @@
     text-align: right;
   }
 
-  .center {
-    text-align: center;
-  }
-
-  .w-circle {
-    position: relative;
+  .wcircle {
+    position: relative; 
     width: 300px; /* 150px; */
     height: 300px; /* 150px; */
     border-radius: 50%;
@@ -87,7 +99,7 @@
     cursor: pointer;
   }
 
-  .w-circle>* {
+  .wcircle>* {
     text-align: center;
     position: absolute;
     border-radius: inherit;
@@ -95,21 +107,21 @@
     height: inherit;
   }
 
-  .w-circle-out {
+  .wcircle-out {
     background: #C2DFFF; /* sea blue */;
-    transition: 1.3s;
+    transition: 0.3s;
   }
 
-  .w-circle-in {
+  .wcircle-in {
     background: white;
-    transition: 0.3s;
+    transition: 1.3s;
     top: 40px; 
     left: 40px;
     width: calc(300px - 80px); 
     height: calc(300px - 80px);
   }
 
-  .flex-container {
+  .wcontainer {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -118,25 +130,35 @@
     align-content: normal;
   }
 
- .w-way {
-    top: 50px;
-    height: 20px;
-  }
+  .witems {
+    display: block;
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+    align-self: auto;
+    order: 0;
+    padding-bottom: 10px;
+   }
 
-  .w-far {
-    top: 70px;
-    height: 20px;
-  }
-
-  .w-age {
-    top: 90px;
-    height: 20px; */
-  }
-
+   .debug {
+        width: 100%;
+   }
 </style>
 {% include 'functions.html' %}
-
 <script>
+
+var debug = document.getElementById('debug');
+debug.innerHTML="<br>";
+
+document.getElementById('agent').innerHTML = navigator.userAgent;
+agent="desktop";
+if (/Android/i.test(navigator.userAgent)) {
+    agent="android";
+}
+if (/iPhone/i.test(navigator.userAgent)) {
+    agent="iphone";
+}
+document.getElementById('myagent').innerHTML = agent;
 
 function clean() {
   var keys = Object.keys(localStorage);
@@ -146,97 +168,175 @@ function clean() {
 }
 
 window.onload = function() {
-    console.log(localStorage.getItem('me'), "loaded");
     if ( localStorage.getItem('me') != null ) {
         document.getElementById('me').value=localStorage.getItem('me');
     }
+    if ( localStorage.getItem('freq') != null ) {
+        document.getElementById('freq').value=localStorage.getItem('freq');
+    }
+    startGEO();
 };
 
 var myname="";
 var myfreq=-1;
-var running=false;
-var lat = 0;
-var lon = 0;
 var timer;
-var friend_updated;
+var friend_updated = "";
 var friend_lat;
 var friend_lon;
+var lat = 0;
+var lon = 0;
+var cir_in = document.getElementById('cir-in');
+var cir_out = document.getElementById('cir-out');
+var direction = 0;
+var last_compass;
+var brng;
+var last_dbrng;
 
-function startGEO() {
-    if (running) {
-        clearInterval(timer);
-        running=false;
-        document.getElementById("start").innerHTML="Start";
-        document.getElementById("msg").innerHTML = "";
-
+function updateCompass() {
+    
+    var compass = 360 - direction;
+    if (Math.abs(compass - last_compass)<180) {
+        cir_out.style.webkitTransition = 'all 0.3s ease-in-out';
     } else {
-        myfreq=document.getElementById("freq").value;
-        if ( myfreq < 1 ) {
-            alert("Selecteer een frequentie");
-            return;
-        }
-        
-        myname=document.getElementById("me").value.trim();
-        if (myname.length < 3) {
-            alert("Naam is te kort");
-            return;
-        }
-        document.getElementById("me").value=myname;
-        localStorage.setItem('me', myname);
-
-        // disable fields here
-        sendToServer();
-        timer = setInterval( sendToServer , myfreq * 1000 );
-        running=true;
-        document.getElementById("start").innerHTML="Stop";
+        cir_out.style.webkitTransition = 'none';
     }
+    cir_out.style.transform = "rotate(" + compass + "deg)";               
+    last_compass = compass;
+
+    var dbrng = compass - brng;
+    if (Math.abs(dbrng - last_dbrng)<180) {
+        cir_in.style.webkitTransition = 'all 0.1s ease-in-out';
+    } else {
+        cir_in.style.webkitTransition = 'none';
+    }
+    cir_in.style.transform = "rotate(" + dbrng + "deg)";
+    last_dbrng = dbrng;
+
+    document.getElementById('compass').innerHTML = "c->" + compass.toFixed(0)
+        + "  b->" + brng.toFixed(0)
+        + "  d->" + dbrng.toFixed(0);
+
 }
 
-function calcGEO() {
-    console.log("calcGEO");
-    if (freq != -1) { //privacy mode
-        sendToServer();
-    } else {
-        updateGEO();
-    }
-
-    path = "/get?id=" + document.getElementById("name").value;
-    console.log(path);
-    fetch(path).then(function (response) {
-        document.getElementById("msg").innerHTML = response.status;
-        return response.text();
-    }).then(function (answer) {
-        console.log("answer", answer);
-
-        if ( answer.length > 0 ) {
-            var json = JSON.parse(answer);
-            
-            friend_updated = json.lastupdated;
-            friend_lat = json.latitude;
-            friend_lon = json.longitude;
-        }
-
-        dist = distanceInKM(lat, lon, friend_lat, friend_lon);
-        if ( dist < 1 ) {
-            answer = (dist*1000).toFixed(0) + "m";
-        } else {
-            answer = dist.toFixed(0) + "km";
-        }
-        document.getElementById("far").innerHTML = answer;
-
-        last = timeAgo(new Date(friend_updated));
-        document.getElementById("age").innerHTML = last.short;
-
-        brng = calculateDegrees(lat, lon, friend_lat, friend_lon);
-        document.getElementById("way").innerHTML = degToCompass(brng);
+function startCompass() {
+    
+    if (agent == "desktop" ) {
+        document.getElementById('compass').innerHTML = "desktop";
         var el = document.getElementsByClassName("circle");
         for(var i = 0; i < el.length; i++) {
             el[i].style.transform = "rotate(" + brng + "deg)";
         }
+    }
+    
+    if (agent == "android" ) {
+        window.addEventListener('deviceorientation', (e) => {
+            direction = e.webkitCompassHeading;
+                updateCompass();
+        })
+    }
 
-    }).catch(function (err) {
-        aler("unexpected error" + err);
-    })
+    if (agent == "iphone" ) {
+        DeviceOrientationEvent.requestPermission()
+        .then(response => {
+            if (response == 'granted') {
+                window.addEventListener('deviceorientation', (e) => {
+                    direction = e.webkitCompassHeading
+                        updateCompass();
+                })
+            }
+        })
+        .catch(error => {
+            debug.innerHTML = debug.innerHTML + " error: " + error + " <br>";
+            console.error(error);
+        })
+    }
+
+}
+
+function startGEO() {
+
+    myfreq=document.getElementById("freq").value;
+    clearInterval(timer);
+
+    if (myfreq < 0) {
+        document.getElementById("msg").innerHTML = "";
+        document.getElementById("me").disabled=false;
+
+    } else {
+        document.getElementById("me").disabled=true;
+        
+        myname=document.getElementById("me").value.trim();
+        if (myname.length < 3) {
+            alert("Naam is te kort");
+            document.getElementById("freq").value=-1;
+        } else {
+            document.getElementById("me").value=myname;
+            localStorage.setItem('me', myname);
+
+            if ( myfreq > 0 ) {
+                getGEOandSendToServer();
+                timer = setInterval( getGEOandSendToServer() , myfreq * 1000 );
+            }
+        }
+    }
+    localStorage.setItem('freq', document.getElementById("freq").value);
+
+}
+
+function calcGEO() {
+    document.getElementById("cir-in").style.backgroundColor = "red";
+
+    navigator.geolocation.getCurrentPosition( function( position ) {
+        lat = position.coords.latitude;
+        lon = position.coords.longitude;
+
+        path = "/get?id=" + document.getElementById("name").value;
+        console.log(path);
+        fetch(path).then(function (response) {
+            document.getElementById("msg").innerHTML = response.status;
+            return response.json();
+        }).then(function (json) {
+            console.log(json);
+
+            friend_updated = json.lastupdated;
+            friend_lat = json.latitude;
+            friend_lon = json.longitude;
+
+            updateGEO();
+
+            document.getElementById("cir-in").style.backgroundColor = "white";
+
+            startCompass()
+
+        }).catch(function (err) {
+            alert("unexpected error" + err);
+        })
+
+        if ( myfreq == 0 ) {
+            sendToServer();
+        }
+
+    }, function(error) {
+        alert("Geolocation failed");
+    }, gelocationOptions);
+}
+
+function updateGEO() {
+
+    dist = distanceInKM(lat, lon, friend_lat, friend_lon);
+    if ( dist < 1 ) {
+        answer = (dist*1000).toFixed(0) + "m";
+    } else {
+        answer = dist.toFixed(0) + "km";
+    }
+    document.getElementById("far").innerHTML = answer;
+
+    last = timeAgo(friend_updated);
+    document.getElementById("age").innerHTML = last.short;
+
+    brng = calculateDegrees(lat, lon, friend_lat, friend_lon);
+    document.getElementById("way").innerHTML = degToCompass(brng);
+
 }
 
 const gelocationOptions = {
@@ -245,28 +345,21 @@ const gelocationOptions = {
   maximumAge: 0
 }
 
-function updateGEO() {
-    // uncomment this to work on production
-    // lat = 12.34;
-    // lon = 33.44;
-    // return true;
-  if (navigator.geolocation) {
+function getGEOandSendToServer() {
     navigator.geolocation.getCurrentPosition( function( position ) {
         lat = position.coords.latitude;
         lon = position.coords.longitude;
-        return true;
+
+        sendToServer();
+
     }, function(error) {
-        alert("Geolocation failed");
-        return false;
-    }, gelocationOptions)
-  } else {
-        alert("Geolocation not supported.");
-        return false;
-  }
+        alert("Send Geolocation failed");
+    }, gelocationOptions);
+
 }
 
 function sendToServer() {
-    if ( updateGEO() == false ) return;
+
     var path = "/set?id=" + myname + "&longitude=" + lon + "&latitude=" + lat;
 
     console.log(path);
@@ -280,6 +373,12 @@ function sendToServer() {
     }).catch(function (err) {
         console.warn("unexpected error", err)
     })
+
+    // if defined, update the friend's location
+    if ( friend_updated != "" ) {
+        updateGEO();
+    }
+
 }
 
 </script>

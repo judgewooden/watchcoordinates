@@ -163,30 +163,12 @@
 
 </style>
 
+{% include 'functions.html' %}
+
 <script>
 
 var lat = 0;
 var lng = 0;
-
-// calculate distance in km for two geocoordinates
-function distanceInKM(lat1, lon1, lat2, lon2) {
-    if ((lat1 == lat2) && (lon1 == lon2)) {
-        dist = 0;
-    } else {
-        var radlat1 = Math.PI * lat1/180;
-        var radlat2 = Math.PI * lat2/180;
-        var theta = lon1-lon2;
-        var radtheta = Math.PI * theta/180;
-        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-        if (dist > 1) {
-            dist = 1;
-        }
-        dist = Math.acos(dist);
-        dist = dist * 180/Math.PI;
-        dist = dist * 60 * 1.1515 * 1.609344;
-    }
-    return dist;
-}
 
 function calculateDistance(a, b) {
     var lat1 = document.getElementById("latitude" + a).value;
@@ -208,63 +190,6 @@ function calculateDistance(a, b) {
         answer = dist.toFixed(0) + "km";
     }
     document.getElementById("far" + a).innerHTML = answer;
-}
-
-// function to explain the time difference between to dates
-function timeAgo(datetime) {
-    var msPerMinute = 60 * 1000;
-    var msPerHour = msPerMinute * 60;
-    var msPerDay = msPerHour * 24;
-    var msPerMonth = msPerDay * 30;
-    var msPerYear = msPerDay * 365;
-
-    var elapsed = new Date() - datetime;
-
-    if ( isNaN(elapsed) ) {
-        long = "no data available";
-        short = "no update";
-    } else if (elapsed < msPerMinute) {
-        long = Math.round(elapsed/1000) + ' seconds ago';
-        short = Math.round(elapsed/1000) + 'sec';
-    } else if (elapsed < msPerHour) {
-        long = Math.round(elapsed/msPerMinute) + ' minutes ago';
-        short = Math.round(elapsed/msPerMinute) + 'min';
-    }
-    else if (elapsed < msPerDay) {
-        long = Math.round(elapsed/msPerHour) + ' hours ago';
-        short = Math.round(elapsed/msPerHour) + 'uur';
-    }
-    else if (elapsed < msPerMonth) {
-        long = Math.round(elapsed/msPerDay) + ' days ago';
-        short = Math.round(elapsed/msPerDay) + 'dagen';
-    }
-    else if (elapsed < msPerYear) {
-        long = Math.round(elapsed/msPerMonth) + ' months ago';
-        short = Math.round(elapsed/msPerMonth) + 'maand';
-    }
-    else {
-        long = Math.round(elapsed/msPerYear) + ' years ago';
-        short = Math.round(elapsed/msPerYear) + 'jaren';
-    }
-    return { 'long' : long, 'short' : short };
-}
-
-// calculate the direction in degrees for two geocoordinates
-function calculateDegrees(lat1, lng1, lat2, lng2) {
-    y = Math.sin(lng2 - lng1) * Math.cos(lat2);
-    x = Math.cos(lat1) * Math.sin(lat2) -
-            Math.sin(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1);
-    brng = Math.atan2(y, x);
-    brng = brng * 180 / Math.PI;
-    brng = (brng + 360) % 360;
-    return brng;
-}
-
-// display bearing in windirection words
-function degToCompass(num) {
-    var val = Math.floor((num / 22.5) + 0.5);
-    var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-    return arr[(val % 16)];
 }
 
 // update Direction fields
@@ -315,11 +240,13 @@ function copyMyLocation(i) {
 function updateFields() {
 
     for( i=1;i<=2;i++ ) {
-        document.getElementById("name" + i).innerHTML = document.getElementById("id" + i).value.substring(0, 8);
-        last = timeAgo(new Date(document.getElementById("lastupdated" + i).innerHTML));
+        last = timeAgo(document.getElementById("lastupdated" + i).innerHTML);
         document.getElementById("timeago" + i).innerHTML = last.long;
         document.getElementById("age" + i).innerHTML = last.short;
     }
+        
+    document.getElementById("name1").innerHTML = document.getElementById("id2").value.substring(0, 8);
+    document.getElementById("name2").innerHTML = document.getElementById("id1").value.substring(0, 8);
 
     calculateDistance(1, 2);
     calculateDirection(1, 2);
@@ -329,7 +256,11 @@ function updateFields() {
 }
 
 var timer_interval = document.getElementById('timer').value * 1000; // in milliseconds
-if ( isNaN(timer_interval) ) document.getElementById('timer').value = "60";
+console.log(timer_interval);
+if ( isNaN(timer_interval) || (timer_interval < 1) ) {
+    document.getElementById('timer').value = "60";
+    var timer_interval = document.getElementById('timer').value * 1000; // in milliseconds
+}
 var timer = setInterval( updateFields , timer_interval );
 var timeron = true;
 
@@ -353,17 +284,13 @@ function receiveFromServer(i) {
     console.log(path);
     fetch(path).then(function (response) {
         document.getElementById("msg" + i).innerHTML = response.status;
-        return response.text();
-    }).then(function (answer) {
-        console.log("answer", answer);
+        return response.json();
+    }).then(function (json) {
+        console.log("answer", json);
 
-        if ( answer.length > 0 ) {
-            var json = JSON.parse(answer);
-            
-            document.getElementById("lastupdated" + i).innerHTML = json.lastupdated;
-            document.getElementById("latitude" + i).value = json.latitude;
-            document.getElementById("longitude" + i).value = json.longitude;
-        }
+        document.getElementById("lastupdated" + i).innerHTML = json.lastupdated;
+        document.getElementById("latitude" + i).value = json.latitude;
+        document.getElementById("longitude" + i).value = json.longitude;
         
     }).catch(function (err) {
         document.getElementById("msg" + i).innerHTML = "unexpected error" + err;
