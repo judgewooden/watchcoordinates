@@ -3,68 +3,63 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <body>
     <div class=all>
-        <div class="status">Status:<span id=msg></span> 
-        </div>
-    </div>
-    <div class=all>
         <div class=block>
-            <div>
-                <label for=me>Mijn naam:</label>
-                <input type="string" id=me size=10 list="watches">
-            </div>
-            <div>
-                <label for=freq>Frequency:</label>
-                <select id=freq size=1 onchange="startGEO()">
-                    <option value="-1">Privacy modus</option>
-                    <option value="5">5 sec</option>
-                    <option value="10">10 sec</option>
-                    <option value="15">15 sec</option>
-                    <option value="30">30 sec</option>
-                    <option value="60">1 min</option>
-                    <option value="120">2 min</option>
-                    <option value="300">5 min</option>
-                    <option value="600">10 min</option>
-                    <option value="900">15 min</option>
-                    <option value="1800">30 min</option>
-                    <option value="3600">1 uur</option>
-                    <option value="0">Doe ik zelf</option>
-                </select> 
-            </div>
-            <div>
-                <label for=name>Zoek naar:</label>
-                <select class=field id=name onchange="getFriendsGEOFromServer()">
-                    {% for item in watches %}
-                    <option>{{ item }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <div id=iphonecompass>
-                    <label></label>
-                    <button type="button" onclick="startCompass()">Start compass</button> 
-                </div>
-            </div>
+            <label>Mijn naam:</label>
+            <input type="string" id=me size=10 list="watches">
+            <span id=msg style="transition-delay: 1s;"></span> 
         </div>
-    </div>
-        <div id=circ class=wcircle onclick="getFriendsGEOFromServer()"">
-            <!-- <div id=cir-out class='circle wcircle-out'>&#9660;</div> -->
-            <div id=cir-out class='circle wcircle-out'><div id=id></div><div id=far></div><div id=age></div></div>
-            <div id=cir-in class='circle wcircle-in'>&#9650;<div id=way></div></div>
-            <div class='wcontainer'>
-                <div id=way2 class="witems">direct</div>
-                <!-- <div id=far class="witems">far</div> -->
-                <div id=age2 class="witems">age</div>
-            </div> 
+        <div class=block>
+            <label>Frequency:</label>
+            <select id=freq size=1 onchange="startGEO()">
+                <option value="-1">Privacy modus</option>
+                <option value="5">5 sec</option>
+                <option value="10">10 sec</option>
+                <option value="15">15 sec</option>
+                <option value="30">30 sec</option>
+                <option value="60">1 min</option>
+                <option value="120">2 min</option>
+                <option value="300">5 min</option>
+                <option value="600">10 min</option>
+                <option value="900">15 min</option>
+                <option value="1800">30 min</option>
+                <option value="3600">1 uur</option>
+                <option value="0">Doe ik zelf</option>
+            </select> <br>
+        </div>
+        <div class=block>
+            <label>Zoek naar:</label>
+            <select id="name" onchange="calcGEO()">
+                {% for item in watches %}
+                <option>{{ item }}</option>
+                {% endfor %}
+            </select> 
+        </div>
+        <div id=iphonecompass class=block>
+            <label></label>
+            <button type="button" onclick="startCompass()">Start iphone compass</button> <br> <br>
+        </div>
+        <div class=block>
+            <div id=circ class=wcircle onclick="calcGEO()"">
+                <!-- <div id=cir-out class='circle wcircle-out'>&#9660;</div> -->
+                <div id=cir-out class='circle wcircle-out'><div id=name></div><br><div id=far></div></div>
+                <div id=cir-in class='circle wcircle-in'>&#9650;</div>
+                <div class='wcontainer'>
+                    <div id=way class="witems">direct</div>
+                    <!-- <div id=far class="witems">far</div> -->
+                    <div id=age class="witems">age</div>
+                </div> 
+            </div>
         </div>
         <div id=dial class=block></div>
         <div class=debug>
             <table id=table></table>
-            <a href="/web">debug console</a> <br>
+            <a href="/web"">debug console</a> <br>
             <div id=debug_coordinates></div><br>
             my agent:<span id=myagent></span> <br>
             agent:<span id=agent></span> <br>
             debug:<span id=debug></span> <br>
         </div>  
+    <div>
 <datalist id=watches>
 {% for item in watches %}
 <option>{{ item }}</option>
@@ -79,37 +74,26 @@
     font-size: large;
   }
 
-  .status {
-    display: inline-block;
-    /* background-color: green; */
-    width: 340px;
-    font-size: xx-small;
-  }
-  /* body {
-    text-align: center;
-  } */
-
   .all {
-    display: flex;
-    justify-content: center;
+    text-align: center;
+    margin:auto;
+    display:block;
   }
 
   .block {
-    /* left: calc(100% - 340px); */
-    /* background-color: yellow; */
-    line-height: 30px;
-    width: 340px;
-    margin-bottom: 18px;
-  } 
+    text-align: left;
+    width: 300px;
+    margin:auto;
+    margin-bottom: 4px;
+  }
 
   label {
     display: inline-block;
+    width: 100px;
     text-align: right;
-    width: 170px;
   }
 
   .wcircle {
-    left: calc(50% - 170px);
     font-size:10px;
     position: relative; 
     width: 340px; /* 150px; */
@@ -129,11 +113,12 @@
 
   .wcircle-out {
     background: #C2DFFF; /* sea blue */;
-    opacity: 0.8;
+    transition: 0.3s;
   }
 
   .wcircle-in {
     background: white;
+    transition: 1.3s;
     top: 40px; 
     left: 40px;
     width: calc(340px - 80px); 
@@ -160,17 +145,19 @@
    }
 
    .debug {
-        text-align: center;
         width: 100%;
    }
-
-   #table {
-        margin-left: auto;
-        margin-right: auto;
-    }
 </style>
 <style>
-    /* @media (orientation:landscape) {
+    #compass {
+        background-image:-webkit-radial-gradient(30% 30%, #FFEE72, #666900);
+        margin:auto;
+        border-radius:210px;
+        width:340px;
+        height:340px;
+        display:block;
+    }
+    @media (orientation:landscape) {
         #compass {
             margin-top:20px;
         }
@@ -179,7 +166,18 @@
         #compass {
             margin-top:80px;
         }
-    } */
+    }
+    #rim {
+        background-image:-webkit-radial-gradient(30% 30%, #C2DFFF, #C2DFFF);
+        /* box-shadow:0 0 4px #444 inset; */
+        /* box-shadow:0 0 4px #444; */
+        position:relative;
+        top:20px;
+        left:20px;
+        border-radius:180px;
+        width:300px;
+        height:300px;
+    }
     #spinner {
         background-image:-webkit-radial-gradient(30% 30%, #FFF6F4, #D1C790);
         box-shadow:0 0 4px #444 inset;
@@ -239,6 +237,16 @@
 </style>
 {% include 'functions.html' %}
 <script>
+// var compass = document.getElementById('dial').appendChild(document.createElement('article'));
+// compass.id='compass';
+
+// var rim = compass.appendChild(document.createElement('article'));
+// rim.id='rim';
+// arrow = rim.appendChild(document.createElement('div'));
+// arrow.className='arrow';
+// arrow.innerText="x";
+
+// var spinner = rim.appendChild(document.createElement('article'));
 var spinner = document.getElementById('circ').appendChild(document.createElement('article'));
 spinner.id='spinner';
 
@@ -302,39 +310,59 @@ var my_freq=-1;
 var my_timer;
 var my_lat = 0;
 var my_lon = 0;
+var friend_updated = "";
+var friend_lat;
+var friend_lon;
 
 var heading = 0;
-var lastheading;
+var bearing;
 
-var friend_id = [],
-    friend_lat = [],
-    friend_lon = [];
-    friend_bearing = [],
-    friend_lastbearing = [],
-    friend_distance = [],
-    friend_updated = [];
-var num_of_friends = -1;
+var friend_names = [];
+var friend_updated = [];
+var friend_lat = []
+var friend_lon = [];
+var num_of_friend = -1;
 
-// function to calcualte the minium date from a list of dates
-function millisecondsToNextMinDate(dates) {
-    var min = new Date(dates[0]);
-    for (var i = 1; i < dates.length; i++) {
-        if (dates[i] < min) {
-            min = dates[i];
-        }
-    }
-    var now = new Date();
-    var milliseconds = now.getTime() - min.getTime();
-    return milliseconds;
+// create a html table to display the friend's location
+function createTable() {
+    var table = document.getElementById('table');
+    var row = table.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var cell5 = row.insertCell(4);
+    var cell6 = row.insertCell(5);
+    var cell7 = row.insertCell(6);
+    cell1.innerHTML = "Name";
+    cell2.innerHTML = "Updated";
+    cell3.innerHTML = "Latitude";
+    cell4.innerHTML = "Longitude";
+    cell5.innerHTML = "Direction";
+    cell6.innerHTML = "Ago";
+    cell7.innerHTML = "How-Far";
 }
 
-// function calculate the seconds between two dates
-function secondsBetween(date1, date2) {
-    // Get the number of milliseconds
-    var milliseconds = date2.getTime() - date1.getTime();
-    // Convert to seconds
-    return milliseconds / 1000;
+// add a new row to the table
+function addRow(name, distance, lat, lon, direct, ago, far) {
+    var table = document.getElementById('table');
+    var row = table.insertRow(1);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var cell5 = row.insertCell(4);
+    var cell6 = row.insertCell(5);
+    var cell7 = row.insertCell(6);
+    cell1.innerHTML = name;
+    cell2.innerHTML = updated;
+    cell3.innerHTML = lat;
+    cell4.innerHTML = lon;
+    cell4.innerHTML = direct;
+    cell4.innerHTML = ago;
+    cell4.innerHTML = far;
 }
+
 var _table_ = document.createElement('table'),
   _tr_ = document.createElement('tr'),
   _th_ = document.createElement('th'),
@@ -381,66 +409,60 @@ function addAllColumnHeaders(arr, table) {
 var cir_in = document.getElementById('cir-in');
 var cir_out = document.getElementById('cir-out');
 // debug this last_ stuff it does not seem to work !!!!
+var last_heading;
+var last_bearing;
 function updateCompass() {
     
-    try {
-        var new_heading = 360 - heading;
-        if (Math.abs(new_heading - lastheading)<180) {
-            spinner.style.webkitTransition = 'all 0.2s ease-in-out';
-        } else {
-            spinner.style.webkitTransition = 'none';
-        }
-        spinner.style.webkitTransform = 'rotate(' + new_heading + 'deg)';
-        lastheading = new_heading;
-        debug_msg = "heading->360-" + heading.toFixed(0) + "=" + new_heading.toFixed(0) + "°<br>" 
-
-        // do this for each friend
-        for (var i = 0; i < num_of_friends; i++) {
-
-            var new_bearing = new_heading - (360 - friend_bearing[i]);
-            if (Math.abs(new_bearing - friend_lastbearing[i])<180) {
-                cir_out.style.webkitTransition = 'all 0.1s ease-in-out';
-                cir_in.style.webkitTransition = 'all 0.1s ease-in-out';
-            } else {
-                cir_out.style.webkitTransition = 'none';
-                cir_in.style.webkitTransition = 'none';
-            }
-            cir_out.style.transform = "rotate(" + new_bearing + "deg)";
-            cir_in.style.transform = "rotate(" + new_bearing + "deg)";
-            friend_lastbearing[i] = new_bearing;
-            debug_msg = debug_msg + friend_id[i]+ '->' + new_heading.toFixed(0) + "-360-" + friend_bearing[i].toFixed(0)
-                        + "=" + new_bearing.toFixed(0) + '°<br>';
-        }
-
-        document.getElementById('debug_coordinates').innerHTML = debug_msg;
-    } catch (err) {
-        // console.log('errCompass', e.message);
-        debug.innerHTML += "errCompass " + err.message + "<br>";
+try {
+    var new_heading = 360 - heading;
+    if (Math.abs(new_heading - last_heading)<180) {
+        cir_out.style.webkitTransition = 'all 0.3s ease-in-out';
+    } else {
+        cir_out.style.webkitTransition = 'none';
     }
+    cir_out.style.transform = "rotate(" + new_heading + "deg)";               
+    last_heading = new_heading;
+
+    if (Math.abs(new_heading - last_heading)<180) {
+        spinner.style.webkitTransition = 'all 0.2s ease-in-out';
+    } else {
+        spinner.style.webkitTransition = 'none';
+    }
+    spinner.style.webkitTransform = 'rotateZ(-' + new_heading + 'deg)';
+    last_heading = new_heading;
+
+    var new_bearing = new_heading - bearing;
+    if (Math.abs(new_bearing - last_bearing)<180) {
+        cir_in.style.webkitTransition = 'all 0.1s ease-in-out';
+    } else {
+        cir_in.style.webkitTransition = 'none';
+    }
+    cir_in.style.transform = "rotate(" + new_bearing + "deg)";
+    last_bearing = new_bearing;
+
+    document.getElementById('debug_coordinates').innerHTML = "heading->" + new_heading.toFixed(0)
+        + "°  bearing->" + new_bearing.toFixed(0) + "°";
+} catch (e) {
+    debug.innerHTML += "error " + e.message + "<br>";
+}
+
 }
 
 function startCompass() {
     
     if (agent == "desktop" ) {
-        // do this per friend   
-        var debug_msg = "";
-        for (var i = 0; i < num_of_friends; i++) {
-            debug_msg = debug_msg + ' ' + friend_id[i]+ '->' + friend_bearing[i].toFixed(0) + '°';
-
-            var el = document.getElementsByClassName("circle");
-            for(var l = 0; l < el.length; l++) {
-                el[l].style.transform = "rotate(" + friend_bearing[i] + "deg)";
-            }
-            spinner.style.webkitTransform = 'rotateZ(-' +  friend_bearing[i] + 'deg)';
+        document.getElementById('debug_coordinates').innerHTML = "bearing:" + bearing + "°"
+        var el = document.getElementsByClassName("circle");
+        for(var i = 0; i < el.length; i++) {
+            el[i].style.transform = "rotate(" + bearing + "deg)";
         }
-        document.getElementById('debug_coordinates').innerHTML = debug_msg;
+        spinner.style.webkitTransform = 'rotateZ(-' + bearing + 'deg)';
     }
     
-    // detect the device oritation on android
     if (agent == "android" ) {
-        window.addEventListener('deviceorientationabsolute', (e) => {
-            heading = Math.abs(e.alpha - 360);
-            updateCompass();
+        window.addEventListener('deviceorientation', (e) => {
+            heading = e.webkitCompassHeading;
+                updateCompass();
         })
     }
 
@@ -450,14 +472,14 @@ function startCompass() {
             if (response == 'granted') {
                 window.addEventListener('deviceorientation', (e) => {
                     heading = e.webkitCompassHeading
-                    updateCompass();
+                        updateCompass();
                 })
             }
         })
         .catch(error => {
             alert("Please start iphone compass")
-            console.error(error);
             debug.innerHTML = debug.innerHTML + " error: " + error + " <br>";
+            console.error(error);
         })
     }
 
@@ -465,7 +487,7 @@ function startCompass() {
 
 function startGEO() {
 
-    my_freq = document.getElementById("freq").value;
+    my_freq=document.getElementById("freq").value;
     clearInterval(my_timer);
 
     if (my_freq < 0) {
@@ -475,7 +497,7 @@ function startGEO() {
     } else {
         document.getElementById("me").disabled=true;
         
-        my_name = document.getElementById("me").value.trim();
+        my_name=document.getElementById("me").value.trim();
         if (my_name.length < 3) {
             alert("Naam is te kort");
             document.getElementById("freq").value=-1;
@@ -493,7 +515,7 @@ function startGEO() {
 
 }
 
-function getFriendsGEOFromServer() {
+function calcGEO() {
     document.getElementById("cir-in").style.backgroundColor = "red";
 
     navigator.geolocation.getCurrentPosition( function( position ) {
@@ -508,26 +530,11 @@ function getFriendsGEOFromServer() {
         }).then(function (json) {
             console.log(json);
 
-            document.getElementById('table').replaceChildren( buildHtmlTable(json) );
+            document.getElementById('table').appendChild( buildHtmlTable(json) );
 
-            friends = [];
-            friend_id = [];
-            friend_lat = [];
-            friend_lon = [];
-            friend_bearing = [];
-            friend_lastbearing = [];
-            friend_distance = [];
-            friend_updated = [];
-            num_of_friends = json.length;
-            for (var i = 0; i < num_of_friends; i++) {
-                friend_id.push(json[i].id);
-                friend_lat.push(+json[i].latitude);
-                friend_lon.push(+json[i].longitude);
-                friend_bearing.push(-1);
-                friend_lastbearing.push(-1);
-                friend_distance.push("");
-                friend_updated.push(new Date(json[i].lastupdated.replace(/-/g, "/")));
-            }
+            friend_updated = json.lastupdated;
+            friend_lat = json.latitude;
+            friend_lon = json.longitude;
 
             updateGEO();
 
@@ -536,7 +543,7 @@ function getFriendsGEOFromServer() {
             startCompass()
 
         }).catch(function (err) {
-            alert("calc geo unexpected error " + err);
+            alert("unexpected error" + err);
         })
 
         if ( my_freq == 0 ) {
@@ -550,27 +557,19 @@ function getFriendsGEOFromServer() {
 
 function updateGEO() {
 
-    for (var i = 0; i < num_of_friends; i++) {
-
-        friend_distance[i] = distanceInKM(my_lat, my_lon, friend_lat[i], friend_lon[i]);
-        friend_bearing[i] = calculateDegrees(my_lat, my_lon, friend_lat[i], friend_lon[i]);
-        console.log('updateGEO', friend_id[i], my_lat, my_lon, friend_lat[i], friend_lon[i], friend_distance[i], friend_bearing[i]);
-
-        //// REWRITE THIS to have sep[erate elements per friend]
-        document.getElementById("way").innerHTML = degToCompass(friend_bearing[i]);
-        if ( friend_distance[i] < 1 ) {
-            answer = (friend_distance[i]*1000).toFixed(0) + "m";
-        } else {
-            answer = friend_distance[i].toFixed(0) + "km";
-        }
-        document.getElementById("id").innerHTML = friend_id[i];
-        document.getElementById("far").innerHTML = answer;
-
-        // seperate elements per friend but also update on a timer clock
-        last = timeAgo(friend_updated[i]);
-        document.getElementById("age").innerHTML = last.short;
-
+    dist = distanceInKM(my_lat, my_lon, friend_lat, friend_lon);
+    if ( dist < 1 ) {
+        answer = (dist*1000).toFixed(0) + "m";
+    } else {
+        answer = dist.toFixed(0) + "km";
     }
+    document.getElementById("far").innerHTML = answer;
+
+    last = timeAgo(friend_updated);
+    document.getElementById("age").innerHTML = last.short;
+
+    bearing = calculateDegrees(my_lat, my_lon, friend_lat, friend_lon);
+    document.getElementById("way").innerHTML = degToCompass(bearing);
 
 }
 
@@ -606,7 +605,10 @@ function sendToServer() {
         console.warn("unexpected error", err)
     })
 
-    if ( num_of_friends > 0 ) updateGEO();
+    // if lookgin at friend, update the friend's location
+    if ( friend_updated != "" ) {
+        updateGEO();
+    }
 }
 
 </script>

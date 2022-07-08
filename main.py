@@ -28,29 +28,30 @@ def compass_mobile():
 
 @app.route('/get')
 def api_get():
-    id = request.args.get('id').strip()
+    try:
+        answers=[]
+        answer={}
+        id = request.args.get('id').strip()
+        answer['lastupdated'] = r.hget("watch:" + id, "lastupdated")
+        if answer['lastupdated'] is None or id is None or len(id) < 3:
+            if app.config["DEBUG"]:
+                print(f"get NOT FOUND {id}")
+            return "", 404
 
-    answer={}
-    answer['id'] = id
-    answer['lastupdated'] = r.hget("watch:" + id, "lastupdated")
-    if answer['lastupdated'] is None or id is None or len(id) < 3:
+        answer['id'] = id
+        answer['longitude'] = r.hget("watch:" + id, "longitude")
+        answer['latitude'] = r.hget("watch:" + id, "latitude")
+        answers.append(answer) 
         if app.config["DEBUG"]:
-            print("NOT FOUND", id)
-        return "", 404
-
-    print("hello")
-    answer['longitude'] = r.hget("watch:" + id, "longitude")
-    answer['latitude'] = r.hget("watch:" + id, "latitude")
-
-    if app.config["DEBUG"]:
-        print("get", answer)
-    return json.dumps(answer), 200
+            print(f"get SUCCESS {answers}")
+        return json.dumps(answers), 200
+    except Exception as e:
+        if app.config["DEBUG"]:
+            print(f"get BAD REQUEST {e}")
+        return '', 400
 
 @app.route('/set')
 def api_set():
-    if app.config["DEBUG"]:
-        print("set", request.args )
-    
     try:
         id = request.args.get('id').strip()
         latitude = float(request.args.get('latitude'))
@@ -61,17 +62,18 @@ def api_set():
             raise Exception("latidude missing")
         if longitude is None:
             raise Exception("longitude missing")
+        now = datetime.datetime.now()
+
+        r.hset("watch:" + id, "lastupdated", now.strftime("%Y-%m-%d %H:%M:%S") )
+        r.hset("watch:" + id, "longitude", longitude)
+        r.hset("watch:" + id, "latitude", latitude)
+        if app.config["DEBUG"]:
+            print(f"set SUCCESS {request.args.to_dict()}") 
+        return '', 200
     except Exception as e:
         if app.config["DEBUG"]:
-            print("BAD REQUEST", e)
+            print(f"set BAD REQUEST {e}")
         return '', 400
 
-    now = datetime.datetime.now()
-
-    r.hset("watch:" + id, "lastupdated", now.strftime("%Y-%m-%d %H:%M:%S") )
-    r.hset("watch:" + id, "longitude", longitude)
-    r.hset("watch:" + id, "latitude", latitude)
-    return '', 200
-
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, use_debugger=False, use_reloader=False, passthrough_errors=True )

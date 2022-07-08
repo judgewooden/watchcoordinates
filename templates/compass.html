@@ -9,17 +9,19 @@
 
                 var compass = document.body.appendChild(document.createElement('article'));
                 compass.id='compass';
+
                 var spinner = compass.appendChild(document.createElement('article'));
                 spinner.id='spinner';
+
                 var pin = spinner.appendChild(document.createElement('article'));
                 pin.id='pin';
 
-                for (var degrees=0, degree; degrees<360; degrees+=30) {
-                    degree = spinner.appendChild(document.createElement('label'));
-                    degree.className='degree';
-                    degree.innerText = degrees;
-                    degree.style.webkitTransform = 'rotateZ(' + degrees + 'deg)'
-                }
+                // for (var degrees=0, degree; degrees<360; degrees+=30) {
+                //     degree = spinner.appendChild(document.createElement('label'));
+                //     degree.className='degree';
+                //     degree.innerText = degrees;
+                //     degree.style.webkitTransform = 'rotateZ(' + degrees + 'deg)'
+                // }
                 ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].forEach(function(label, index) {
                     var main = ((index % 2)?'':' main');
                     point = spinner.appendChild(document.createElement('label'));
