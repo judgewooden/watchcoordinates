@@ -286,11 +286,11 @@ function receiveFromServer(i) {
         document.getElementById("msg" + i).innerHTML = response.status;
         return response.json();
     }).then(function (json) {
-        console.log("answer", json);
+        console.log("answer", json.longitude);
 
-        document.getElementById("lastupdated" + i).innerHTML = json.lastupdated;
-        document.getElementById("latitude" + i).value = json.latitude;
-        document.getElementById("longitude" + i).value = json.longitude;
+        document.getElementById("lastupdated" + i).innerHTML = json[0].lastupdated;
+        document.getElementById("latitude" + i).value = json[0].latitude;
+        document.getElementById("longitude" + i).value = +json[0].longitude;
         
     }).catch(function (err) {
         document.getElementById("msg" + i).innerHTML = "unexpected error" + err;
