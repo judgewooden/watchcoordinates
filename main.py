@@ -5,7 +5,7 @@ import datetime
 from flask import render_template, request
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+app.debug = False
 r = redis.Redis(decode_responses=True)
 
 @app.route('/web')
@@ -34,7 +34,7 @@ def api_get():
         id = request.args.get('id').strip()
         answer['lastupdated'] = r.hget("watch:" + id, "lastupdated")
         if answer['lastupdated'] is None or id is None or len(id) < 3:
-            if app.config["DEBUG"]:
+            if app.debug:
                 print(f"get NOT FOUND {id}")
             return "", 404
 
@@ -42,11 +42,11 @@ def api_get():
         answer['longitude'] = r.hget("watch:" + id, "longitude")
         answer['latitude'] = r.hget("watch:" + id, "latitude")
         answers.append(answer) 
-        if app.config["DEBUG"]:
+        if app.debug:
             print(f"get SUCCESS {answers}")
         return json.dumps(answers), 200
     except Exception as e:
-        if app.config["DEBUG"]:
+        if app.debug:
             print(f"get BAD REQUEST {e}")
         return '', 400
 
@@ -67,11 +67,11 @@ def api_set():
         r.hset("watch:" + id, "lastupdated", now.strftime("%Y-%m-%d %H:%M:%S") )
         r.hset("watch:" + id, "longitude", longitude)
         r.hset("watch:" + id, "latitude", latitude)
-        if app.config["DEBUG"]:
+        if app.debug:
             print(f"set SUCCESS {request.args.to_dict()}") 
         return '', 200
     except Exception as e:
-        if app.config["DEBUG"]:
+        if app.debug:
             print(f"set BAD REQUEST {e}")
         return '', 400
 

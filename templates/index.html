@@ -3,19 +3,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <body>
     <div class=all>
-        <div class="status">Status:<span id=msg></span> 
+        <div class=block_status>
+            <div class="status">Sending:<span id=send_msg>Off</span></div>
+            <div class="status">Receiving:<span id=receive_msg>None</span></div>
+            <div class="status">Compass:<span id=compass_msg>Off</span></div>
         </div>
     </div>
     <div class=all>
         <div class=block>
             <div>
-                <label for=me>Mijn naam:</label>
+                <label for=me>My name:</label>
                 <input type="string" id=me size=10 list="watches">
             </div>
             <div>
                 <label for=freq>Frequency:</label>
                 <select id=freq size=1 onchange="startGEO()">
-                    <option value="-1">Privacy modus</option>
+                    <option value="-1">Off</option>
                     <option value="5">5 sec</option>
                     <option value="10">10 sec</option>
                     <option value="15">15 sec</option>
@@ -27,7 +30,7 @@
                     <option value="900">15 min</option>
                     <option value="1800">30 min</option>
                     <option value="3600">1 uur</option>
-                    <option value="0">Doe ik zelf</option>
+                    <!-- <option value="0">Doe ik zelf</option> -->
                 </select> 
             </div>
             <div>
@@ -46,25 +49,29 @@
             </div>
         </div>
     </div>
-        <div id=circ class=wcircle onclick="getFriendsGEOFromServer()"">
-            <!-- <div id=cir-out class='circle wcircle-out'>&#9660;</div> -->
-            <div id=cir-out class='circle wcircle-out'><div id=id></div><div id=far></div><div id=age></div></div>
-            <div id=cir-in class='circle wcircle-in'>&#9650;<div id=way></div></div>
-            <div class='wcontainer'>
-                <div id=way2 class="witems">direct</div>
-                <!-- <div id=far class="witems">far</div> -->
-                <div id=age2 class="witems">age</div>
-            </div> 
-        </div>
+    <div id=circ class=wcircle onclick="getFriendsGEOFromServer()"">
+        <!-- <div id=cir-out class='circle wcircle-out'>&#9660;</div> -->
+        <div id=cir-out class='circle wcircle-out'><div id=id></div><div id=far></div><div id=age></div></div>
+        <div id=cir-in class='circle wcircle-in'>&#9650;<div id=way></div></div>
+{% if config['DEBUG'] %}
+        <div class='wcontainer'>
+            <div id=way2 class="witems">direct</div>
+            <!-- <div id=far class="witems">far</div> -->
+            <div id=age2 class="witems">age</div>
+        </div> 
+{% endif %}
+    </div>
+{% if config['DEBUG'] %}
+    <div class=debug>
         <div id=dial class=block></div>
-        <div class=debug>
-            <table id=table></table>
-            <a href="/web">debug console</a> <br>
-            <div id=debug_coordinates></div><br>
-            my agent:<span id=myagent></span> <br>
-            agent:<span id=agent></span> <br>
-            debug:<span id=debug></span> <br>
-        </div>  
+        <table id=table></table>
+        <a href="/web">debug console</a> <br>
+        <div id=debug_coordinates></div><br>
+        my agent:<span id=myagent></span> <br>
+        agent:<span id=agent></span> <br>
+        debug:<span id=debug></span> <br>
+    </div>  
+{% endif %}
 <datalist id=watches>
 {% for item in watches %}
 <option>{{ item }}</option>
@@ -74,20 +81,29 @@
 </html>
 
 <style>
-  html {
+html {
     font-family: sans-serif;
     font-size: large;
   }
 
+  .block_status {
+    /* background-color: yellow; */
+    line-height: 12px;
+    width: 340px;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-content: stretch;
+    align-items: flex-start;
+  } 
+
   .status {
     display: inline-block;
-    /* background-color: green; */
-    width: 340px;
+    /* background-color: green;  */
     font-size: xx-small;
   }
-  /* body {
-    text-align: center;
-  } */
 
   .all {
     display: flex;
@@ -140,6 +156,7 @@
     height: calc(340px - 80px);
   }
 
+{% if config['DEBUG'] %}
   .wcontainer {
     display: flex;
     flex-direction: column;
@@ -167,9 +184,8 @@
    #table {
         margin-left: auto;
         margin-right: auto;
-    }
-</style>
-<style>
+   }
+
     /* @media (orientation:landscape) {
         #compass {
             margin-top:20px;
@@ -180,6 +196,7 @@
             margin-top:80px;
         }
     } */
+{% endif %}
     #spinner {
         background-image:-webkit-radial-gradient(30% 30%, #FFF6F4, #D1C790);
         box-shadow:0 0 4px #444 inset;
@@ -245,12 +262,14 @@ spinner.id='spinner';
 var pin = spinner.appendChild(document.createElement('article'));
 pin.id='pin';
 
+{% if config['DEBUG'] %}
 // for (var degrees=0, degree; degrees<360; degrees+=30) {
 //     degree = spinner.appendChild(document.createElement('label'));
 //     degree.className='degree';
 //     degree.innerText = degrees;
 //     degree.style.webkitTransform = 'rotateZ(' + degrees + 'deg)'
 // }
+{% endif %}
 ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].forEach(function(label, index) {
     var main = ((index % 2)?'':' main');
     // console.log(label, index, main);
@@ -262,13 +281,7 @@ pin.id='pin';
     arrow.className='arrow' + main;
     arrow.style.webkitTransform = 'rotateZ(' + (index * 45) + 'deg)'
 });
-</script>
 
-<script>
-var debug = document.getElementById('debug');
-debug.innerHTML="<br>";
-
-document.getElementById('agent').innerHTML = navigator.userAgent;
 agent="desktop";
 if (/Android/i.test(navigator.userAgent)) {
     agent="android";
@@ -278,7 +291,12 @@ if (/iPhone/i.test(navigator.userAgent)) {
 } else {
     document.getElementById('iphonecompass').style = "display:none";
 }
+
+{% if config['DEBUG'] %}
+document.getElementById('agent').innerHTML = navigator.userAgent;
 document.getElementById('myagent').innerHTML = agent;
+var debug = document.getElementById('debug');
+debug.innerHTML="<br>";
 
 function clean() {
   var keys = Object.keys(localStorage);
@@ -286,6 +304,7 @@ function clean() {
     localStorage.removeItem(key);
   }
 }
+{% endif %}
 
 window.onload = function() {
     if ( localStorage.getItem('me') != null ) {
@@ -300,6 +319,7 @@ window.onload = function() {
 var my_name="";
 var my_freq=-1;
 var my_timer;
+var my_timer_timeago;
 var my_lat = 0;
 var my_lon = 0;
 
@@ -315,72 +335,11 @@ var friend_id = [],
     friend_updated = [];
 var num_of_friends = -1;
 
-// function to calcualte the minium date from a list of dates
-function millisecondsToNextMinDate(dates) {
-    var min = new Date(dates[0]);
-    for (var i = 1; i < dates.length; i++) {
-        if (dates[i] < min) {
-            min = dates[i];
-        }
-    }
-    var now = new Date();
-    var milliseconds = now.getTime() - min.getTime();
-    return milliseconds;
-}
-
-// function calculate the seconds between two dates
-function secondsBetween(date1, date2) {
-    // Get the number of milliseconds
-    var milliseconds = date2.getTime() - date1.getTime();
-    // Convert to seconds
-    return milliseconds / 1000;
-}
-var _table_ = document.createElement('table'),
-  _tr_ = document.createElement('tr'),
-  _th_ = document.createElement('th'),
-  _td_ = document.createElement('td');
-
-// Builds the HTML Table out of myList json data from Ivy restful service.
-function buildHtmlTable(arr) {
-  var table = _table_.cloneNode(false),
-    columns = addAllColumnHeaders(arr, table);
-  for (var i = 0, maxi = arr.length; i < maxi; ++i) {
-    var tr = _tr_.cloneNode(false);
-    for (var j = 0, maxj = columns.length; j < maxj; ++j) {
-      var td = _td_.cloneNode(false);
-      var cellValue = arr[i][columns[j]];
-      td.appendChild(document.createTextNode(arr[i][columns[j]] || ''));
-      tr.appendChild(td);
-    }
-    table.appendChild(tr);
-  }
-  return table;
-}
-
-// Adds a header row to the table and returns the set of columns.
-// Need to do union of keys from all records as some records may not contain
-// all records
-function addAllColumnHeaders(arr, table) {
-  var columnSet = [],
-    tr = _tr_.cloneNode(false);
-  for (var i = 0, l = arr.length; i < l; i++) {
-    for (var key in arr[i]) {
-      if (arr[i].hasOwnProperty(key) && columnSet.indexOf(key) === -1) {
-        columnSet.push(key);
-        var th = _th_.cloneNode(false);
-        th.appendChild(document.createTextNode(key));
-        tr.appendChild(th);
-      }
-    }
-  }
-  table.appendChild(tr);
-  return columnSet;
-}
-
 // rewrite this for multiple users using array
 var cir_in = document.getElementById('cir-in');
 var cir_out = document.getElementById('cir-out');
-// debug this last_ stuff it does not seem to work !!!!
+
+// function to update the dials when user rotate phone
 function updateCompass() {
     
     try {
@@ -392,7 +351,9 @@ function updateCompass() {
         }
         spinner.style.webkitTransform = 'rotate(' + new_heading + 'deg)';
         lastheading = new_heading;
+{% if config['DEBUG'] %}
         debug_msg = "heading->360-" + heading.toFixed(0) + "=" + new_heading.toFixed(0) + "°<br>" 
+{% endif %}
 
         // do this for each friend
         for (var i = 0; i < num_of_friends; i++) {
@@ -408,36 +369,51 @@ function updateCompass() {
             cir_out.style.transform = "rotate(" + new_bearing + "deg)";
             cir_in.style.transform = "rotate(" + new_bearing + "deg)";
             friend_lastbearing[i] = new_bearing;
+{% if config['DEBUG'] %}
             debug_msg = debug_msg + friend_id[i]+ '->' + new_heading.toFixed(0) + "-360-" + friend_bearing[i].toFixed(0)
                         + "=" + new_bearing.toFixed(0) + '°<br>';
+{% endif %}
         }
-
+{% if config['DEBUG'] %}
         document.getElementById('debug_coordinates').innerHTML = debug_msg;
+{% endif %}
     } catch (err) {
-        // console.log('errCompass', e.message);
+        console.log('errCompass', e.message);
+{% if config['DEBUG'] %}
         debug.innerHTML += "errCompass " + err.message + "<br>";
+{% else %}
+        alert ("errCompass " + err.message);
+{% endif %}
     }
 }
 
+// function to start the compass based on each device preferences
 function startCompass() {
     
     if (agent == "desktop" ) {
         // do this per friend   
+        document.getElementById("compass_msg").innerHTML = "desktop";
+{% if config['DEBUG'] %}
         var debug_msg = "";
+{% endif %}
         for (var i = 0; i < num_of_friends; i++) {
+{% if config['DEBUG'] %}
             debug_msg = debug_msg + ' ' + friend_id[i]+ '->' + friend_bearing[i].toFixed(0) + '°';
-
+{% endif %}
             var el = document.getElementsByClassName("circle");
             for(var l = 0; l < el.length; l++) {
                 el[l].style.transform = "rotate(" + friend_bearing[i] + "deg)";
             }
             spinner.style.webkitTransform = 'rotateZ(-' +  friend_bearing[i] + 'deg)';
         }
+{% if config['DEBUG'] %}
         document.getElementById('debug_coordinates').innerHTML = debug_msg;
+{% endif %}
     }
     
     // detect the device oritation on android
     if (agent == "android" ) {
+        document.getElementById("compass_msg").innerHTML = "android";
         window.addEventListener('deviceorientationabsolute', (e) => {
             heading = Math.abs(e.alpha - 360);
             updateCompass();
@@ -448,6 +424,7 @@ function startCompass() {
         DeviceOrientationEvent.requestPermission()
         .then(response => {
             if (response == 'granted') {
+                document.getElementById("compass_msg").innerHTML = "iphone";
                 window.addEventListener('deviceorientation', (e) => {
                     heading = e.webkitCompassHeading
                     updateCompass();
@@ -457,7 +434,9 @@ function startCompass() {
         .catch(error => {
             alert("Please start iphone compass")
             console.error(error);
+{% if config['DEBUG'] %}
             debug.innerHTML = debug.innerHTML + " error: " + error + " <br>";
+{% endif %}
         })
     }
 
@@ -469,7 +448,7 @@ function startGEO() {
     clearInterval(my_timer);
 
     if (my_freq < 0) {
-        document.getElementById("msg").innerHTML = "";
+        document.getElementById("send_msg").innerHTML = "Off";
         document.getElementById("me").disabled=false;
 
     } else {
@@ -494,6 +473,7 @@ function startGEO() {
 }
 
 function getFriendsGEOFromServer() {
+    document.getElementById("receive_msg").innerHTML = "Request";
     document.getElementById("cir-in").style.backgroundColor = "red";
 
     navigator.geolocation.getCurrentPosition( function( position ) {
@@ -501,14 +481,21 @@ function getFriendsGEOFromServer() {
         my_lon = position.coords.longitude;
 
         path = "/get?id=" + document.getElementById("name").value;
+{% if config['DEBUG'] %}
         console.log(path);
+{% endif %}
         fetch(path).then(function (response) {
-            document.getElementById("msg").innerHTML = response.status;
+            if ( response.status == 200 ) {
+                document.getElementById("receive_msg").innerHTML = "Success";
+            } else {
+                document.getElementById("receive_msg").innerHTML = response.status;
+            }
             return response.json();
         }).then(function (json) {
+{% if config['DEBUG'] %}
             console.log(json);
-
             document.getElementById('table').replaceChildren( buildHtmlTable(json) );
+{% endif %}
 
             friends = [];
             friend_id = [];
@@ -548,13 +535,37 @@ function getFriendsGEOFromServer() {
     }, gelocationOptions);
 }
 
+function updateTimeAgo() {
+        // seperate elements per friend but also update on a timer clock
+        clearTimeout(my_timer_timeago);
+        if ( friend_updated.length < 0 ) {
+            return;
+        }
+        var min = new Date(friend_updated[0]);
+        for (var i = 0; i < num_of_friends; i++) {
+            last = timeAgo(friend_updated[i]);
+            document.getElementById("age").innerHTML = last.short;
+
+            if (friend_updated[i] < min) {
+                min = friend_updated[i];
+            }
+        }
+        var now = new Date();
+        var seconds = (now.getTime() - min.getTime());
+        if ( seconds < 61000 ) { 
+            nextupdate = 1000;
+        } else {
+            nextupdate = 60000;
+        }
+        my_timer_timeago = setTimeout( updateTimeAgo, nextupdate);
+}
+
 function updateGEO() {
 
     for (var i = 0; i < num_of_friends; i++) {
 
         friend_distance[i] = distanceInKM(my_lat, my_lon, friend_lat[i], friend_lon[i]);
         friend_bearing[i] = calculateDegrees(my_lat, my_lon, friend_lat[i], friend_lon[i]);
-        console.log('updateGEO', friend_id[i], my_lat, my_lon, friend_lat[i], friend_lon[i], friend_distance[i], friend_bearing[i]);
 
         //// REWRITE THIS to have sep[erate elements per friend]
         document.getElementById("way").innerHTML = degToCompass(friend_bearing[i]);
@@ -566,10 +577,7 @@ function updateGEO() {
         document.getElementById("id").innerHTML = friend_id[i];
         document.getElementById("far").innerHTML = answer;
 
-        // seperate elements per friend but also update on a timer clock
-        last = timeAgo(friend_updated[i]);
-        document.getElementById("age").innerHTML = last.short;
-
+        my_timer_timeago = setInterval( updateTimeAgo, 0);
     }
 
 }
@@ -594,14 +602,22 @@ function getGEOandSendToServer() {
 
 function sendToServer() {
     var path = "/set?id=" + my_name + "&longitude=" + my_lon + "&latitude=" + my_lat;
+{% if config['DEBUG'] %}
     console.log(path);
+{% endif %}
     fetch(path).then(function (response) {
-        document.getElementById("msg").innerHTML = response.status;
+        if ( response.status == 200 ) {
+            document.getElementById("send_msg").innerHTML = "Working...";
+        } else {
+            document.getElementById("send_msg").innerHTML = response.status;
+        }
         return response.text();
     }).then(function (html) {
+{% if config['DEBUG'] %}
         if ( html.length > 0 ) {
             console.log(html);
         }
+{% endif %}
     }).catch(function (err) {
         console.warn("unexpected error", err)
     })
